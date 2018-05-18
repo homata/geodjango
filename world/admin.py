@@ -1,3 +1,5 @@
-from django.contrib import admin
+#from django.contrib import admin
+from django.contrib.gis import admin
+from world.models import Border
 
-# Register your models here.
+admin.site.register(Border, admin.GeoModelAdmin)

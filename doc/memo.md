@@ -176,7 +176,201 @@ Windows
     $ python manage.py runserver
     -> http://localhost:8000/
 
-### Geographic Data
+### Geographic Data (行政区域)
+
+    $ mkdir world/data
+    $ cd world/data
+
+    国土数値情報　ダウンロードサービス
+    http://nlftp.mlit.go.jp/ksj/
+    
+    座標系	JGD2011 -> SRID=6668
+    
+    2. 政策区域 -> 行政区域 -> 神奈川県 をダウンロード
+    -> N03-170101_14_GML.zip
+        N03-17_14_170101.dbf
+        N03-17_14_170101.prj
+        N03-17_14_170101.shp
+        N03-17_14_170101.shx
+        N03-17_14_170101.xml
+
+    構造確認 -> Polygonデータ
+    $ ogrinfo N03-17_14_170101.shp
+    INFO: Open of `N03-17_14_170101.shp'
+          using driver `ESRI Shapefile' successful.
+    1: N03-17_14_170101 (Polygon)
+
+    N03-17_14_170101レイヤー確認
+    $ ogrinfo -so N03-17_14_170101.shp N03-17_14_170101
+    INFO: Open of `N03-17_14_170101.shp'
+          using driver `ESRI Shapefile' successful.
+    
+    Layer name: N03-17_14_170101
+    Metadata:
+      DBF_DATE_LAST_UPDATE=2017-02-16
+    Geometry: Polygon
+    Feature Count: 1292
+    Extent: (138.915768, 35.128492) - (139.835841, 35.672897)
+    Layer SRS WKT:
+    GEOGCS["GCS_JGD_2011",
+        DATUM["JGD_2011",
+            SPHEROID["GRS_1980",6378137.0,298.257222101]],
+        PRIMEM["Greenwich",0.0],
+        UNIT["Degree",0.0174532925199433]]
+    N03_001: String (10.0)
+    N03_002: String (20.0)
+    N03_003: String (20.0)
+    N03_004: String (20.0)
+    N03_007: String (5.0)
+
+
+    シェープファイルのモデル作成
+    座標系	JGD2011 -> SRID=6668
+    
+    $ python manage.py ogrinspect --srid=6668 world/data/N03-17_14_170101.shp Border
+        # This is an auto-generated Django model module created by ogrinspect.
+        from django.contrib.gis.db import models
+        
+        class Border(models.Model):
+            n03_001 = models.CharField(max_length=10)
+            n03_002 = models.CharField(max_length=20)
+            n03_003 = models.CharField(max_length=20)
+            n03_004 = models.CharField(max_length=20)
+            n03_007 = models.CharField(max_length=5)
+            geom = models.PolygonField(srid=6668)
+
+    $ vi world/model.py
+
+    $ python manage.py makemigrations
+    # -*- coding: utf-8 -*-
+    #from django.db import models
+    from django.contrib.gis.db import models
+    from django.utils import timezone
+    from django.forms.models import model_to_dict
+    from django.utils.translation import ugettext as _
+    
+    # This is an auto-generated Django model module created by ogrinspect.
+    from django.contrib.gis.db import models
+    
+    class Border(models.Model):
+        n03_001 = models.CharField('都道府県名', max_length=10, null=False, default="")
+        n03_002 = models.CharField('支庁・振興局名', max_length=20, blank=True, null=False, default="")
+        n03_003 = models.CharField('郡・政令都市名',max_length=20, blank=True, null=False, default="")
+        n03_004 = models.CharField('市区町村名',max_length=20, blank=True, null=False, default="")
+        n03_007 = models.CharField('行政区域コード',max_length=5, blank=True, null=False, default="")
+        geom = models.PolygonField(srid=6668)
+    
+        class Meta:
+            verbose_name = _('行政区域')
+            verbose_name_plural = _('行政区域一覧')
+    
+        def to_dict(self):
+            return model_to_dict(self)
+    
+        def update(self):
+            #self.update_date = timezone.now()
+            self.save()
+    
+        def __str__(self):
+            return self.n03_004
+
+        migrateファイル作成
+        $ python manage.py makemigrations
+        Migrations for 'world':
+          world/migrations/0001_initial.py
+            - Create model Border
+
+        migrate実行
+        $ python manage.py migrate
+        Operations to perform:
+          Apply all migrations: admin, auth, contenttypes, sessions, world
+        Running migrations:
+          Applying world.0001_initial... OK
+
+        
+        テーブル確認
+        $ psql -U postgres geodjango
+
+        geodjango=# \dt
+                           List of relations
+         Schema |            Name            | Type  |  Owner
+        --------+----------------------------+-------+----------
+         public | auth_group                 | table | postgres
+         public | auth_group_permissions     | table | postgres
+         public | auth_permission            | table | postgres
+         public | auth_user                  | table | postgres
+         public | auth_user_groups           | table | postgres
+         public | auth_user_user_permissions | table | postgres
+         public | django_admin_log           | table | postgres
+         public | django_content_type        | table | postgres
+         public | django_migrations          | table | postgres
+         public | django_session             | table | postgres
+         public | spatial_ref_sys            | table | postgres
+         public | world_border               | table | postgres
+        (12 rows)
+
+  
+    シェープデータをデータベースにロード
+    $ vi world/load.py
+        # -*- coding: utf-8 -*-
+        import os
+        from django.contrib.gis.utils import LayerMapping
+        from world.models import Border
+
+        # Modelとシェープファイルのカラムのマッピング
+        border_mapping = {
+            'n03_001' : 'N03_001',
+            'n03_002' : 'N03_002',
+            'n03_003' : 'N03_003',
+            'n03_004' : 'N03_004',
+            'n03_007' : 'N03_007',
+            'geom' : 'POLYGON',
+        }
+
+        # ロード シェープファイル
+        border_shp = os.path.abspath(
+            os.path.join(os.path.dirname(__file__), 'data', 'N03-17_14_170101.shp'),
+        )
+
+        def run(verbose=True):
+            lm = LayerMapping(Border, border_shp, border_mapping, transform=False, encoding='sjis')
+            lm.save(strict=True, verbose=verbose)
+
+    load.py実行
+    $ python manage.py shell
+        In [1]: from demo import load
+        In [2]: load.run()
+        In [3]: exit
+
+    $ psql -U postgres geodjango
+
+        geodjango=# select count(*) from world_border;
+         count
+        -------
+          1292
+        (1 row)
+        geodjango=# \q
+
+##### Admin
+
+    $ vi world/admin.py
+        from django.contrib.gis import admin
+        from world.models import Border
+
+        admin.site.register(Border, admin.GeoModelAdmin)
+
+
+    $ vi geodjango/urls.py
+
+from django.conf.urls import patterns, include, url
+from django.contrib.gis import admin
+admin.autodiscover()
+
+urlpatterns = patterns('',
+    url(r'^admin/', include(admin.site.urls)),
+)
+
+### Geographic Data (World)
 
     テストデータダウンロード
     $ mkdir world/data
