@@ -1,0 +1,70 @@
+{% load staticfiles %}
+{% load i18n %}
+
+<!DOCTYPE html>
+<html lang="ja">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
+    <title>{% if request.path != '/' %}{% block title %}{% endblock %} | {% endif %}{% trans 'Road Damage Detection Challenge' %}</title>
+
+    <!-- Tell the browser to be responsive to screen width -->
+    <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
+
+    <!-- i18n -->
+    <script type="text/javascript" src="{% url 'javascript-catalog' %}"></script>
+
+    <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+      <script src="https://oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js"></script>
+      <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+    <![endif]-->
+
+    <!-- font -->
+    <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css">
+
+    <!-- Bootstrap 3.3.7 -->
+    <link rel="stylesheet" href="{% static 'node_modules/bootstrap/dist/css/bootstrap.min.css' %}">
+    <!-- Bootstrap Optional theme -->
+    <link rel="stylesheet" href="{% static 'node_modules/bootstrap/dist/css/bootstrap-theme.min.css' %}">
+
+    <!-- bdc -->
+    <link rel="stylesheet" href="{% static 'css/base.css' %}">
+
+    {% block extrahead %}
+    {% endblock %}
+  </head>
+
+  <body>
+    {% block content %}
+    {% endblock %}
+
+    <!-- jQuery 3.3.1 (necessary for Bootstrap's JavaScript plugins) -->
+    <script type="text/javascript" src="{% static 'node_modules/jquery/dist/jquery.min.js' %}"></script>
+    <!-- Bootstrap 3.3.7 -->
+    <script type="text/javascript" src="{% static 'node_modules/bootstrap/dist/js/bootstrap.min.js' %}"></script>
+
+    <!--
+    jQuery UI モーダルでダイアログを開くサンプル(Dialog)
+    https://itsakura.com/jquery-dialog
+    -->
+    <!-- jquery-ui-1.12.1 -->
+    <script type="text/javascript" src="{% static 'js/jquery-ui-1.12.1/jquery-ui.min.js' %}"></script>
+    <link rel="stylesheet" href="{% static 'js/jquery-ui-1.12.1/jquery-ui.min.css' %}">
+
+    {% block css %}
+    {% endblock %}
+
+    {% block js %}
+    {% endblock %}
+
+    <!-- bdc -->
+    <script type="text/javascript" src={% static 'js/base.js' %}></script>
+
+    <!-- GoogleAnalytics -->
+    {% include 'google.html' %}
+  </body>
+</html>

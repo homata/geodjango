@@ -382,8 +382,41 @@ Windows
 
     $ pip install django-leaflet
 
+    $ vi world/admin.py
+        from django.contrib.gis import admin
+        from world.models import Border
+        from leaflet.admin import LeafletGeoAdmin
+
+        class BorderAdmin(LeafletGeoAdmin):
+          search_fields = ['n03_001','n03_003','n03_004']
+          list_filter = ('n03_004', )
+
+        admin.site.register(Border, BorderAdmin)
 
 
+#### django-geojson
+
+
+from world.models import Border
+from django.core.serializers import serialize
+
+serialize('geojson', Border.objects.all(), geometry_field='geom',fields=('n03_004',))
+serialize('geojson', Border.objects.filter(n03_003="川崎市"), geometry_field='geom',fields=('n03_004',))
+serialize('geojson', Border.objects.filter(id=1), geometry_field='geom',fields=('n03_004',))
+
+In [6]: serialize('geojson', Border.objects.filter(id=1), geometry_field='geom',fields=('n03_004',))
+Out[6]: '{"type": "FeatureCollection", "crs": {"type": "name", "properties": {"name": "EPSG:4326"}}, "features": [{"type": "Feature", "properties": {"n03_004": "\\u9db4\\u898b\\u533a"}, "geometry": {"type": "Polygon", "coordinates": [[[139.67603133600005, 35.45629161300003], [139.67587019500002, 35.455984837999964], [139.67581192, 35.455874054000034], [139.67579549899997, 35.455865027], [139.675773022, 35.45586238700005], [139.675740195, 35.455868640000034], [139.67571450100002, 35.455885387], [139.67570430599997, 35.455912586000025], [139.67576016899997, 35.456023531999975], [139.67582211399997, 35.456004134999965], [139.67586997400002, 35.456092359999985], [139.67594143999997, 35.45622389200002], [139.675933165, 35.456236414], [139.67595422799997, 35.45628502700002], [139.675975136, 35.45629405399997], [139.675981284, 35.45630910799997], [139.67603133600005, 35.45629161300003]]]}}]}'
+
+
+* [GeoJSON Serializer](https://docs.djangoproject.com/en/2.0/ref/contrib/gis/serializers/)
+
+
+#### djangorestframework
+
+    $ pip install djangorestframework
+        $ pip install django-filter
+        $ pip install django-bootstrap-form
+        $ pip install dj-database-url
 
 
 ---------

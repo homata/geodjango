@@ -1,0 +1,31 @@
+{% extends 'base.html' %}
+{% load staticfiles %}
+{% load i18n %}
+
+{% block title %}Overview{% endblock %}
+
+<!-- header --->
+{% block extrahead %}
+<link rel="stylesheet" href="{% static 'overview/css/style.css' %}">
+{% endblock %}
+
+<!-- body --->
+{% block content %}
+
+{% include 'header.html' %}
+
+{% include 'content_header.html' %}
+{% include 'overview/content_body.html' %}
+
+{% include 'footer.html' %}
+
+{% endblock %}
+
+<!-- body css --->
+{% block css %}
+{% endblock %}
+
+<!-- body javascript --->
+{% block js %}
+{% endblock %}
+

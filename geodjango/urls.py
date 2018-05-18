@@ -22,8 +22,13 @@ Including another URLconf
 
 from django.urls import include, path
 from django.contrib.gis import admin
+from django.views.generic.base import RedirectView
+
 admin.autodiscover()
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+
+    path('', RedirectView.as_view(url='world/')),
+    path('world/', include('world.urls')),
 ]
