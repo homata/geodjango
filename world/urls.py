@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+from django.conf.urls import url
 from django.urls import include, path
 from . import views
 from django.views.generic.base import RedirectView
@@ -15,4 +16,7 @@ urlpatterns = [
     path('', views.index, name='index'),
     path('geojson/', apis.GeojsonAPIView.as_view(), name='geojson_view'),
     path('borders.geojson', GeoJSONLayerView.as_view(model=Border), name='borders'),
+
+    #url(r'^borders/(?P<z>\d+)/(?P<x>\d+)/(?P<y>\d+).geojson$',apis.BorderTiledLayer.as_view(model=Border), name='tiledborders'),
+    path('borders/<int:z>/<int:x>/<int:y>.geojson',apis.BorderTiledLayer.as_view(model=Border), name='tiledborders'),
 ]

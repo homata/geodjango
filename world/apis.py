@@ -13,6 +13,7 @@ import json
 
 from world.models import Border
 from django.core.serializers import serialize
+from djgeojson.views import TiledGeoJSONLayerView
 
 # -----------------------------------------
 class GeojsonAPIView(APIView):
@@ -37,5 +38,9 @@ class GeojsonAPIView(APIView):
 
         return response
 
-
-
+# -----------------------------------------
+class BorderTiledLayer(TiledGeoJSONLayerView):
+    # Options
+    srid=4326
+    trim_to_boundary=False
+    properties=('n03_001','n03_003','n03_004','n03_007')
