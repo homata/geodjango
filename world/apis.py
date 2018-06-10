@@ -36,3 +36,6 @@ class GeojsonAPIView(APIView):
             response = Response({}, status=status.HTTP_404_NOT_FOUND)
 
         return response
+
+
+

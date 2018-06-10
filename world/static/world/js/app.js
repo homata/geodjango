@@ -109,7 +109,13 @@ map.on('click', function(e) {
 });
 
 /* GeoJSONレイヤーを追加します */
+/*
 $.getJSON("/world/geojson/", function(data) {
     L.geoJson(data).addTo(map);
 });
+*/
 
+/* GeoJSONレイヤーを追加します */
+$.getJSON("/world/borders.geojson", function(data) {
+    L.geoJson(data).addTo(map);
+});
